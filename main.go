@@ -18,16 +18,16 @@ const (
 	m          = 70
 	T          = 1.4
 	w          = 2 * math.Pi / T
-	yNagrA     = 0.15
+	yNagA      = 0.15
 	aNagr      = 0.4
 	bNagr      = 0.4
-	yNagr0     = aNagr + bNagr - yNagrA - 0.01
+	yNagr0     = aNagr + bNagr - yNagA - 0.01
 	aCyl       = 0.485
 	bCyl       = 0.089
 	dfiNagrCil = 27.24
 )
 
-func makeyNag() (plotter.XYs) {
+func makeyNag() plotter.XYs {
 	var xys plotter.XYs
 	dt := float64(T / points)
 	x := make([]float64, points)
@@ -35,14 +35,14 @@ func makeyNag() (plotter.XYs) {
 	for i := 0; i < points; i++ {
 		ii := float64(i)
 		x[i] = ii * dt
-		y[i] = yNagrA*math.Sin(w*x[i]) + yNagr0
+		y[i] = yNagA*math.Sin(w*x[i]) + yNagr0
 		xys = append(xys, struct{ X, Y float64 }{x[i], y[i]})
-		println(fmt.Sprintf("x=%f,y=%f", x[i],y[i]))
+		println(fmt.Sprintf("x=%f,y=%f", x[i], y[i]))
 	}
 	return xys
 }
 
-func makeDyNag() (plotter.XYs) {
+func makeDyNag() plotter.XYs {
 	var xys plotter.XYs
 	dt := float64(T / points)
 	x := make([]float64, points)
@@ -50,9 +50,9 @@ func makeDyNag() (plotter.XYs) {
 	for i := 0; i < points; i++ {
 		ii := float64(i)
 		x[i] = ii * dt
-		y[i] = yNagrA*math.Cos(w*x[i])*w
+		y[i] = yNagA * math.Cos(w*x[i]) * w
 		xys = append(xys, struct{ X, Y float64 }{x[i], y[i]})
-		println(fmt.Sprintf("x=%f,y=%f", x[i],y[i]))
+		println(fmt.Sprintf("x=%f,y=%f", x[i], y[i]))
 	}
 	return xys
 }
@@ -65,19 +65,27 @@ func makeDDyNag() (plotter.XYs) {
 	for i := 0; i < points; i++ {
 		ii := float64(i)
 		x[i] = ii * dt
-		y[i] = -yNagrA*math.Sin(w*x[i])*w*w
+		y[i] = -yNagA * math.Sin(w*x[i]) * w * w
 		xys = append(xys, struct{ X, Y float64 }{x[i], y[i]})
-		println(fmt.Sprintf("x=%f,y=%f", x[i],y[i]))
+		println(fmt.Sprintf("x=%f,y=%f", x[i], y[i]))
 	}
 	return xys
 }
 
-
-
 func main() {
 	yNagxys := makeyNag()
 
-	err := plotData("out.png", yNagxys)
+	err := plotData("out1.png", yNagxys)
+	if err != nil {
+		log.Fatalf("could not plot data: %v", err)
+	}
+	yNagDxys := makeDyNag()
+	err = plotData("out2.png", yNagDxys)
+	if err != nil {
+		log.Fatalf("could not plot data: %v", err)
+	}
+	yNagDDxys := makeDDyNag()
+	err = plotData("out2.png", yNagDDxys)
 	if err != nil {
 		log.Fatalf("could not plot data: %v", err)
 	}
