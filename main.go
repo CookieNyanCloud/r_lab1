@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"time"
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
@@ -72,26 +73,85 @@ func makeDDyNag() (plotter.XYs) {
 	return xys
 }
 
-func main() {
-	yNagxys := makeyNag()
+const (
+	D,E,F = iota,iota,iota
+)
 
-	err := plotData("out1.png", yNagxys)
-	if err != nil {
-		log.Fatalf("could not plot data: %v", err)
+func main() {
+	//yNagxys := makeyNag()
+	//
+	//err := plotData("out1.png", yNagxys)
+	//if err != nil {
+	//	log.Fatalf("could not plot data: %v", err)
+	//}
+	//yNagDxys := makeDyNag()
+	//err = plotData("out2.png", yNagDxys)
+	//if err != nil {
+	//	log.Fatalf("could not plot data: %v", err)
+	//}
+	//yNagDDxys := makeDDyNag()
+	//err = plotData("out3.png", yNagDDxys)
+	//if err != nil {
+	//	log.Fatalf("could not plot data: %v", err)
+	//}
+	var n int
+	for i:=0;i<100000;i++{
+		go inc(&n)
+		go dec(&n)
+		time.Sleep(time.Second*3)
+		println(n)
 	}
-	yNagDxys := makeDyNag()
-	err = plotData("out2.png", yNagDxys)
-	if err != nil {
-		log.Fatalf("could not plot data: %v", err)
-	}
-	yNagDDxys := makeDDyNag()
-	err = plotData("out3.png", yNagDDxys)
-	if err != nil {
-		log.Fatalf("could not plot data: %v", err)
-	}
+
+
+}
+
+func inc( n *int){
+	*n++
+}
+
+func dec( n *int){
+	*n--
+}
+
+
+func f()(i int)  {
+	defer func(){
+		i++
+	}()
+	i=2
+	return 0
 }
 
 type xy struct{ x, y float64 }
+type MyError struct {
+}
+
+func (MyError) Error()string  {
+	return "MyError"
+}
+
+func errorHandler (err error){
+	if err!= nil {
+		fmt.Println("Error:",err)
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 func readData(path string) (plotter.XYs, error) {
 	f, err := os.Open(path)
