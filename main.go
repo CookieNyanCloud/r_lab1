@@ -37,7 +37,7 @@ func makeyNag() plotter.XYs {
 		x[i] = ii * dt
 		y[i] = yNagA*math.Sin(w*x[i]) + yNagr0
 		xys = append(xys, struct{ X, Y float64 }{x[i], y[i]})
-		println(fmt.Sprintf("x=%f,y=%f", x[i], y[i]))
+		println(fmt.Sprintf("yNag x=%f,y=%f", x[i], y[i]))
 	}
 	return xys
 }
@@ -52,7 +52,7 @@ func makeDyNag() plotter.XYs {
 		x[i] = ii * dt
 		y[i] = yNagA * math.Cos(w*x[i]) * w
 		xys = append(xys, struct{ X, Y float64 }{x[i], y[i]})
-		println(fmt.Sprintf("x=%f,y=%f", x[i], y[i]))
+		println(fmt.Sprintf("DyNag x=%f,y=%f", x[i], y[i]))
 	}
 	return xys
 }
@@ -67,7 +67,7 @@ func makeDDyNag() (plotter.XYs) {
 		x[i] = ii * dt
 		y[i] = -yNagA * math.Sin(w*x[i]) * w * w
 		xys = append(xys, struct{ X, Y float64 }{x[i], y[i]})
-		println(fmt.Sprintf("x=%f,y=%f", x[i], y[i]))
+		println(fmt.Sprintf("DDyNag x=%f,y=%f", x[i], y[i]))
 	}
 	return xys
 }
@@ -85,7 +85,7 @@ func main() {
 		log.Fatalf("could not plot data: %v", err)
 	}
 	yNagDDxys := makeDDyNag()
-	err = plotData("out2.png", yNagDDxys)
+	err = plotData("out3.png", yNagDDxys)
 	if err != nil {
 		log.Fatalf("could not plot data: %v", err)
 	}
