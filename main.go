@@ -1,223 +1,78 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"image/color"
+	"github.com/CookieNyanCloud/r_lab1/chartDir"
+	"github.com/CookieNyanCloud/r_lab1/echartsDir"
+	"github.com/CookieNyanCloud/r_lab1/plotDir"
+	"github.com/go-echarts/go-echarts/v2/charts"
+	"github.com/wcharczuk/go-chart"
 	"log"
-	"math"
 	"os"
-	"time"
-
-	"gonum.org/v1/plot"
-	"gonum.org/v1/plot/plotter"
-	"gonum.org/v1/plot/vg/draw"
-)
-
-const (
-	points     = 100
-	m          = 70
-	T          = 1.4
-	w          = 2 * math.Pi / T
-	yNagA      = 0.15
-	aNagr      = 0.4
-	bNagr      = 0.4
-	yNagr0     = aNagr + bNagr - yNagA - 0.01
-	aCyl       = 0.485
-	bCyl       = 0.089
-	dfiNagrCil = 27.24
-)
-
-func makeyNag() plotter.XYs {
-	var xys plotter.XYs
-	dt := float64(T / points)
-	x := make([]float64, points)
-	y := make([]float64, points)
-	for i := 0; i < points; i++ {
-		ii := float64(i)
-		x[i] = ii * dt
-		y[i] = yNagA*math.Sin(w*x[i]) + yNagr0
-		xys = append(xys, struct{ X, Y float64 }{x[i], y[i]})
-		println(fmt.Sprintf("yNag x=%f,y=%f", x[i], y[i]))
-	}
-	return xys
-}
-
-func makeDyNag() plotter.XYs {
-	var xys plotter.XYs
-	dt := float64(T / points)
-	x := make([]float64, points)
-	y := make([]float64, points)
-	for i := 0; i < points; i++ {
-		ii := float64(i)
-		x[i] = ii * dt
-		y[i] = yNagA * math.Cos(w*x[i]) * w
-		xys = append(xys, struct{ X, Y float64 }{x[i], y[i]})
-		println(fmt.Sprintf("DyNag x=%f,y=%f", x[i], y[i]))
-	}
-	return xys
-}
-
-func makeDDyNag() (plotter.XYs) {
-	var xys plotter.XYs
-	dt := float64(T / points)
-	x := make([]float64, points)
-	y := make([]float64, points)
-	for i := 0; i < points; i++ {
-		ii := float64(i)
-		x[i] = ii * dt
-		y[i] = -yNagA * math.Sin(w*x[i]) * w * w
-		xys = append(xys, struct{ X, Y float64 }{x[i], y[i]})
-		println(fmt.Sprintf("DDyNag x=%f,y=%f", x[i], y[i]))
-	}
-	return xys
-}
-
-const (
-	D,E,F = iota,iota,iota
 )
 
 func main() {
-	//yNagxys := makeyNag()
-	//
-	//err := plotData("out1.png", yNagxys)
-	//if err != nil {
-	//	log.Fatalf("could not plot data: %v", err)
-	//}
-	//yNagDxys := makeDyNag()
-	//err = plotData("out2.png", yNagDxys)
-	//if err != nil {
-	//	log.Fatalf("could not plot data: %v", err)
-	//}
-	//yNagDDxys := makeDDyNag()
-	//err = plotData("out3.png", yNagDDxys)
-	//if err != nil {
-	//	log.Fatalf("could not plot data: %v", err)
-	//}
-	var n int
-	for i:=0;i<100000;i++{
-		go inc(&n)
-		go dec(&n)
-		time.Sleep(time.Second*3)
-		println(n)
-	}
+	myPlot()
+	myChart()
+	myEchart()
+
+
+
 
 
 }
 
-func inc( n *int){
-	*n++
-}
 
-func dec( n *int){
-	*n--
-}
-
-
-func f()(i int)  {
-	defer func(){
-		i++
-	}()
-	i=2
-	return 0
-}
-
-type xy struct{ x, y float64 }
-type MyError struct {
-}
-
-func (MyError) Error()string  {
-	return "MyError"
-}
-
-func errorHandler (err error){
-	if err!= nil {
-		fmt.Println("Error:",err)
-	}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-func readData(path string) (plotter.XYs, error) {
-	f, err := os.Open(path)
+func myPlot()  {
+	yNagxys := plotDir.MakeyNag()
+	err := plotDir.PlotData("plot1.png", yNagxys)
 	if err != nil {
-		return nil, err
+		log.Fatalf("could not plot data: %v", err)
+	}
+	yNagDxys := plotDir.MakeDyNag()
+	err = plotDir.PlotData("plot2.png", yNagDxys)
+	if err != nil {
+		log.Fatalf("could not plot data: %v", err)
+	}
+	yNagDDxys := plotDir.MakeDDyNag()
+	err = plotDir.PlotData("plot3.png", yNagDDxys)
+	if err != nil {
+		log.Fatalf("could not plot data: %v", err)
+	}
+}
+
+func myChart()  {
+	xValues, yValues := chartDir.MakeyNag()
+	graph := chart.Chart{
+		Title:"Ynagr",
+		TitleStyle:chart.Style{
+			Show:true,
+		},
+		Series:[]chart.Series{
+			chart.ContinuousSeries{
+				XValues: xValues,
+				YValues:yValues,
+			},
+		},
+	}
+
+	filename := "output.png"
+	f, err := os.Create(filename)
+	if err != nil {
+		println(err.Error())
 	}
 	defer f.Close()
-
-	var xys plotter.XYs
-	s := bufio.NewScanner(f)
-	for s.Scan() {
-		var x, y float64
-		_, err := fmt.Sscanf(s.Text(), "%f,%f", &x, &y)
-		if err != nil {
-			log.Printf("discarding bad data point %q: %v", s.Text(), err)
-			continue
-		}
-		xys = append(xys, struct{ X, Y float64 }{x, y})
+	err= graph.Render(chart.PNG,f)
+	if err != nil {
+		println(err.Error())
 	}
-	if err := s.Err(); err != nil {
-		return nil, fmt.Errorf("could not scan: %v", err)
-	}
-	return xys, nil
 }
 
-func plotData(path string, xys plotter.XYs) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("could not create %s: %v", path, err)
-	}
+func myEchart()  {
+	xValues, yValues := echartsDir.MakeyNag()
+	line:= charts.NewLine()
+	line.SetXAxis(xValues)
+	line.AddSeries("",yValues)
 
-	p := plot.New()
 
-	// create scatter with all data points
-	s, err := plotter.NewScatter(xys)
-	if err != nil {
-		return fmt.Errorf("could not create scatter: %v", err)
-	}
-	s.GlyphStyle.Shape = draw.CrossGlyph{}
-	s.Color = color.RGBA{R: 255, A: 255}
-	p.Add(s)
 
-	var x, c float64
-	x = 1.2
-	c = -3
-
-	// create fake linear regression result
-	l, err := plotter.NewLine(plotter.XYs{
-		{3, 3*x + c}, {2, 2*x + c},
-	})
-	if err != nil {
-		return fmt.Errorf("could not create line: %v", err)
-	}
-	p.Add(l)
-
-	wt, err := p.WriterTo(256, 256, "png")
-	if err != nil {
-		return fmt.Errorf("could not create writer: %v", err)
-	}
-	_, err = wt.WriteTo(f)
-	if err != nil {
-		return fmt.Errorf("could not write to %s: %v", path, err)
-	}
-
-	if err := f.Close(); err != nil {
-		return fmt.Errorf("could not close %s: %v", path, err)
-	}
-	return nil
 }
