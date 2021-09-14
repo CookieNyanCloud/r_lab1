@@ -4,25 +4,28 @@ import (
 	"github.com/CookieNyanCloud/r_lab1/chartDir"
 	"github.com/CookieNyanCloud/r_lab1/echartsDir"
 	"github.com/CookieNyanCloud/r_lab1/plotDir"
-	"github.com/go-echarts/go-echarts/v2/charts"
+	"github.com/go-echarts/go-echarts/charts"
 	"github.com/wcharczuk/go-chart"
 	"log"
+	"net/http"
 	"os"
+	"sync"
+)
+
+const port = ":8080"
+
+var (
+	wg sync.WaitGroup
 )
 
 func main() {
-	myPlot()
-	myChart()
-	myEchart()
-
-
-
-
-
+	//myPlot()
+	//myChart()
+	startWebServer()
+	wg.Wait()
 }
 
-
-func myPlot()  {
+func myPlot() {
 	yNagxys := plotDir.MakeyNag()
 	err := plotDir.PlotData("plot1.png", yNagxys)
 	if err != nil {
@@ -39,18 +42,17 @@ func myPlot()  {
 		log.Fatalf("could not plot data: %v", err)
 	}
 }
-
-func myChart()  {
+func myChart() {
 	xValues, yValues := chartDir.MakeyNag()
 	graph := chart.Chart{
-		Title:"Ynagr",
-		TitleStyle:chart.Style{
-			Show:true,
+		Title: "Ynagr",
+		TitleStyle: chart.Style{
+			Show: true,
 		},
-		Series:[]chart.Series{
+		Series: []chart.Series{
 			chart.ContinuousSeries{
 				XValues: xValues,
-				YValues:yValues,
+				YValues: yValues,
 			},
 		},
 	}
@@ -61,18 +63,56 @@ func myChart()  {
 		println(err.Error())
 	}
 	defer f.Close()
-	err= graph.Render(chart.PNG,f)
+	err = graph.Render(chart.PNG, f)
 	if err != nil {
 		println(err.Error())
 	}
 }
+func startWebServer() {
+	wg.Add(1)
+	go func() {
+		http.HandleFunc("/", myEchart)
+		http.ListenAndServe(port, nil)
+		wg.Done()
+	}()
+	hostname, _ := os.Hostname()
+	log.Printf("listen http://%v%v", hostname, port)
 
-func myEchart()  {
-	xValues, yValues := echartsDir.MakeyNag()
-	line:= charts.NewLine()
-	line.SetXAxis(xValues)
-	line.AddSeries("",yValues)
+}
 
+func createLine(f func() ([]float64, []float64),name string) *charts.Line {
+	xValues, yValues := f()
 
+	line := charts.NewLine()
+	line.AddXAxis(xValues)
+	line.AddYAxis(name, yValues, charts.LineOpts{
+		Smooth: true,
+	})
+	line.Title = name
+	return line
+}
+
+func myEchart(w http.ResponseWriter, r *http.Request) {
+	line1 := createLine(echartsDir.MakeyNag,"yNag")
+	line2 := createLine(echartsDir.MakeDyNag,"DyNag")
+	line3 := createLine(echartsDir.MakeDDyNag,"DDyNag")
+	line4 := createLine(echartsDir.MakePhiNagr,"PhiNagr")
+	line5 := createLine(echartsDir.MakeRNagr,"RNagr")
+	line6 := createLine(echartsDir.MakePNagr,"PNagr")
+	//line6 := createLine(echartsDir.MakePNagr,"PNagr")
+	line7 := createLine(echartsDir.MakeMNagr,"MNagr")
+
+	page := charts.NewPage()
+	page.Add(line1)
+	page.Add(line2)
+	page.Add(line3)
+	page.Add(line4)
+	page.Add(line5)
+	page.Add(line6)
+	page.Add(line7)
+	err := page.Render(w)
+	if err != nil {
+		println(err.Error())
+	}
 
 }
