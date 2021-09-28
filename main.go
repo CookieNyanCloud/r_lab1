@@ -19,33 +19,26 @@ var (
 )
 
 func main() {
-	//myPlot()
-	//myChart()
-	startWebServer()
-	wg.Wait()
+	myPlot()
+	myChart()
+	//startWebServer()
+	//wg.Wait()
 }
 
 func myPlot() {
-	yNagxys := plotDir.MakeyNag()
-	err := plotDir.PlotData("plot1.png", yNagxys)
+	ynewNagDDxys,maxX,maxY := plotDir.MakeNewPNagr()
+	err := plotDir.PlotData("plot3.png", ynewNagDDxys,maxX,maxY)
 	if err != nil {
 		log.Fatalf("could not plot data: %v", err)
 	}
-	yNagDxys := plotDir.MakeDyNag()
-	err = plotDir.PlotData("plot2.png", yNagDxys)
-	if err != nil {
-		log.Fatalf("could not plot data: %v", err)
-	}
-	yNagDDxys := plotDir.MakeDDyNag()
-	err = plotDir.PlotData("plot3.png", yNagDDxys)
-	if err != nil {
-		log.Fatalf("could not plot data: %v", err)
-	}
+
 }
+
 func myChart() {
-	xValues, yValues := chartDir.MakeyNag()
+	xValues, yValues := chartDir.MakeNewPNagr()
+
 	graph := chart.Chart{
-		Title: "Ynagr",
+		Title: "Ynewnagr",
 		TitleStyle: chart.Style{
 			Show: true,
 		},
@@ -54,6 +47,34 @@ func myChart() {
 				XValues: xValues,
 				YValues: yValues,
 			},
+		},
+		XAxis: chart.XAxis{
+			Name:           "X",
+			NameStyle:      chart.Style{},
+			Style:          chart.Style{},
+			ValueFormatter: nil,
+			Range:          nil,
+			TickStyle:      chart.Style{},
+			Ticks:          nil,
+			TickPosition:   0,
+			GridLines:      nil,
+			GridMajorStyle: chart.Style{},
+			GridMinorStyle: chart.Style{},
+		},
+		YAxis: chart.YAxis{
+			Name:           "Y",
+			NameStyle:      chart.Style{},
+			Style:          chart.Style{},
+			Zero:           chart.GridLine{},
+			AxisType:       0,
+			Ascending:      false,
+			ValueFormatter: nil,
+			Range:          nil,
+			TickStyle:      chart.Style{},
+			Ticks:          nil,
+			GridLines:      nil,
+			GridMajorStyle: chart.Style{},
+			GridMinorStyle: chart.Style{},
 		},
 	}
 
@@ -68,6 +89,7 @@ func myChart() {
 		println(err.Error())
 	}
 }
+
 func startWebServer() {
 	wg.Add(1)
 	go func() {
@@ -80,9 +102,9 @@ func startWebServer() {
 
 }
 
-func createLine(f func() ([]float64, []float64),name string) *charts.Line {
+func createLine(f func() ([]float64, []float64), name string) *charts.Line {
 	xValues, yValues := f()
-
+	//line:= charts.NewGraph()
 	line := charts.NewLine()
 	line.AddXAxis(xValues)
 	line.AddYAxis(name, yValues, charts.LineOpts{
@@ -93,14 +115,18 @@ func createLine(f func() ([]float64, []float64),name string) *charts.Line {
 }
 
 func myEchart(w http.ResponseWriter, r *http.Request) {
-	line1 := createLine(echartsDir.MakeyNag,"yNag")
-	line2 := createLine(echartsDir.MakeDyNag,"DyNag")
-	line3 := createLine(echartsDir.MakeDDyNag,"DDyNag")
-	line4 := createLine(echartsDir.MakePhiNagr,"PhiNagr")
-	line5 := createLine(echartsDir.MakeRNagr,"RNagr")
-	line6 := createLine(echartsDir.MakePNagr,"PNagr")
+	line1 := createLine(echartsDir.MakeyNag, "yNag")
+	line2 := createLine(echartsDir.MakeDyNag, "DyNag")
+	line3 := createLine(echartsDir.MakeDDyNag, "DDyNag")
+	line4 := createLine(echartsDir.MakePhiNagr, "PhiNagr")
+	line5 := createLine(echartsDir.MakeRNagr, "RNagr")
+	line6 := createLine(echartsDir.MakePNagr, "PNagr")
 	//line6 := createLine(echartsDir.MakePNagr,"PNagr")
-	line7 := createLine(echartsDir.MakeMNagr,"MNagr")
+	line7 := createLine(echartsDir.MakeMNagr, "MNagr")
+	//line8 := createLine(echartsDir.MakeNewPNagr, "NewPNagr")
+	//line8 := createLine(echartsDir.MakeNewPNagr1, "NewPNagr")
+	//line := createLine(echartsDir.MakeNewPNagr2, "NewPNagr")
+	//line9 := createLine2(echartsDir.MakeNewPNagr1,echartsDir.MakeNewPNagr2,"NewPNagr")
 
 	page := charts.NewPage()
 	page.Add(line1)
@@ -110,9 +136,28 @@ func myEchart(w http.ResponseWriter, r *http.Request) {
 	page.Add(line5)
 	page.Add(line6)
 	page.Add(line7)
+	//page.Add(line8)
+	//page.Add(line9)
 	err := page.Render(w)
 	if err != nil {
 		println(err.Error())
 	}
 
 }
+
+//func createLine2(f1 func() ([]float64, []float64),f2 func() ([]float64, []float64), name string) *charts.Line {
+//	xValues1, yValues1 := f1()
+//	xValues2, yValues2 := f2()
+//	//line:= charts.NewGraph()
+//	line := charts.NewGraph()
+//	line.Data()
+//	line.AddXAxis(xValues2)
+//	line.AddYAxis(name, yValues1, charts.LineOpts{
+//		Smooth: true,
+//	})
+//	line.AddYAxis(name, yValues2, charts.LineOpts{
+//		Smooth: true,
+//	})
+//	line.Title = name
+//	return line
+//}
