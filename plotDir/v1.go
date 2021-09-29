@@ -5,8 +5,6 @@ import (
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
-	"gonum.org/v1/plot/vg"
-
 	//"gonum.org/v1/plot/vg/draw"
 	//"image/color"
 	"math"
@@ -171,13 +169,13 @@ func PlotData(path string, xys plotter.XYs, maxX,maxY float64) error {
 	}
 
 	p := plot.New()
-	p.Title.Text = "Plotutil example"
+	p.Title.Text = "Plot"
 	p.X.Label.Text = "X"
-	p.X.Padding = -vg.Length(maxX/2)
-	p.X.Max = maxX
+	//p.X.Padding = -vg.Length(maxX/2)
+	//p.X.Max = maxX
 	p.Y.Label.Text = "Y"
-	p.Y.Padding = -vg.Length(maxY)
-	p.Y.Max = maxY
+	//p.Y.Padding = -vg.Length(maxY)
+	//p.Y.Max = maxY
 	//s, err := plotter.NewScatter(xys)
 	fmt.Println(maxX,maxY)
 	err = plotutil.AddLinePoints(p,"First",xys)

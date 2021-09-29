@@ -80,6 +80,26 @@ func MakePhiNagr() ([]float64, []float64) {
 	return x, y
 }
 
+func MakeDPhiNagr()([]float64,[]float64)  {
+	dt := float64(T / points)
+	x := make([]float64, points)
+	y := make([]float64, points)
+	_, yyn := MakePhiNagr()
+	for i := 0; i < points; i++ {
+		ii := float64(i)
+		x[i] = ii * dt
+		y[i] = (math.Acos((math.Pow(aNagr, 2)) +
+			math.Pow(bNagr, 2) - math.Pow(yyn[i], 2)/
+			(2*aNagr*bNagr))-math.Acos((math.Pow(aNagr, 2)) +
+				math.Pow(bNagr, 2) - math.Pow(yyn[i], 2)/(2*aNagr*bNagr))-
+			math.Acos((math.Pow(aNagr, 2)) +
+				math.Pow(bNagr, 2) - math.Pow(yyn[i], 2)/
+				(2*aNagr*bNagr))-math.Acos((math.Pow(aNagr, 2)) +
+			math.Pow(bNagr, 2) - math.Pow(yyn[i], 2)/(2*aNagr*bNagr)))/dt
+	}
+	return x, y
+}
+
 func MakeRNagr() ([]float64, []float64) {
 	dt := float64(T / points)
 	x := make([]float64, points)
